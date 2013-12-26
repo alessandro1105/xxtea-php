@@ -299,8 +299,10 @@ class Crypt_XXTEA {
      *
      * @return string  the string
      */
-    function _long2str($v, $w) {
-        /*
+
+    /*
+    function _long2str($v, $w) { //originale 
+        
         $len = count($v);
         $s = '';
         for ($i = 0; $i < $len; $i++) {
@@ -310,9 +312,14 @@ class Crypt_XXTEA {
             return substr($s, 0, $v[$len - 1]);
         } else {
             return $s;
-        }*/
+        }
 
         $s = "";
+    }
+    */
+
+    /*
+    function _long2str($v, $w) { //originale riscritto
 
         for ($i = 0; $i < count($v); $i++) {
 
@@ -338,6 +345,47 @@ class Crypt_XXTEA {
 
         return $s;
     }
+    */
+
+    function longToStrSize($v) { //riscritto con int a 16 bit
+  
+    $length = (count($v) - 1) * 2;
+
+    if ((int) ($v[count($v) - 1] / pow(256, 1)) > 0) {
+        $length += 2; 
+
+    } else {
+      $length += 1;
+    }
+      
+    return $length;
+     
+  }
+
+    function _long2Str($v, $w) {
+
+        $s = "";
+
+        for ($i = 0; $i < $this->longToStrSize($v); $i++) {
+          $index = (int) ($i / 2);
+        $pow = $i % 2;
+
+            if ($pow + 1 == 2) {
+            $char = $v[$index];
+        } else {
+            $char = $v[$index] - ((int) ($v[$index] / pow(256, $pow + 1)) * pow(256, $pow + 1));
+        }
+
+        if ($pow > 0) {
+        $char = (int) ($char / pow(256, $pow));
+        }
+
+            $s .= chr($char);
+
+        }
+
+        return $s;
+    }
 
     // }}}
 
@@ -354,9 +402,9 @@ class Crypt_XXTEA {
      * @return string  the long integer array
      */
 
-    
-    function _str2long($s, $w) {
-        /*
+    /*
+    function _str2long($s, $w) { //originale
+        
         //echo "str: $s<br>";
         $v = array_values(unpack('V*', $s . str_repeat("\0", (4 - strlen($s) % 4 ) & 3) ) );
 
@@ -368,13 +416,39 @@ class Crypt_XXTEA {
             $v[] = strlen($s);
         }
 
-        return $v;*/
+        return $v;
+    }*/
+
+    /*
+    function _str2long($s, $w) { //originale riscritto
+
         $v = array();
 
         for ($i = 0; $i < strlen($s); $i++) {
 
             $index = (int) ($i / 4);
             $pow = $i % 4;
+
+            if ($pow == 0) {
+                $v[$index] = ord($s[$i]);
+            
+            } else {
+                $v[$index] = $v[$index] + pow(256, $pow) * ord($s[$i]);
+            }
+        }
+
+        return $v;
+    }
+    */
+
+    function _str2long($s, $w) { //riscritto con int a 16 bit
+
+        $v = array();
+
+        for ($i = 0; $i < strlen($s); $i++) {
+
+            $index = (int) ($i / 2);
+            $pow = $i % 2;
 
             if ($pow == 0) {
                 $v[$index] = ord($s[$i]);
@@ -410,8 +484,8 @@ class Crypt_XXTEA {
     }*/
 
     function _int32($n) {
-        while ($n >= 32600) $n -= 65200;
-        while ($n <= -32600) $n += 65200;
+        while ($n >= 32767) $n -= 65535;
+        while ($n <= -32768) $n += 65535;
         return (int)$n;
     }
 

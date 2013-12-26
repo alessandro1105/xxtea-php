@@ -20,7 +20,7 @@
 
 	$xxtea = new Crypt_XXTEA();
 
-	$key = "0123456789012345";
+	$key = "01234567";
 
 	$xxtea->setKey($key);
 
