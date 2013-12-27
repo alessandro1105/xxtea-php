@@ -1,141 +1,57 @@
 <?php
+
+	//require_once("XXTEA.php");
+
+	/*$c = "B";
+
+	$c[0] = chr(ord($c[0]) + 2);
+
+	echo $c;*/
+
+
+	//echo base64_encode(xxtea_encrypt("Ciao!", "chiave"));
+
+	//echo xxtea_decrypt(, "chiave");
+
+	//echo ord('A');
+
+
+	require_once("XXTEA.php");
+
+	$xxtea = new Crypt_XXTEA();
+
+	$key = "0123456789012345";
+
+	$xxtea->setKey($key);
+
+
+	//echo $xxtea->decrypt($xxtea->encrypt("Ciao!"));
 /*
+	$s = "F33Ebw==";
 
-	function longToStrSize($v) { 
-  
-		$length = (count($v) - 1) * 4;
+	echo "test base64 decoded: '" . base64_decode($s) . "'<br>";
+	echo "testo decrittato:<br>";
+	echo $xxtea->decrypt(base64_decode($s));
 
-	 	if ((int) ($v[count($v) - 1] / pow(256, 3)) > 0) {
-	    	$length += 4; 
-
-	  	} else if ((int) ($v[count($v) - 1] / pow(256, 2)) > 0) {
-	    	$length += 3; 
-
-	 	} else if ((int) ($v[count($v) - 1] / pow(256, 1)) > 0) {
-	    	$length += 2; 
-
-		} else {
-			$length += 1;
-		}
-		  
-	 	return $length;
-	   
-	}
-  */
-
-  function longToStrSize($v) { //riscritto con int a 16 bit
-  
-    $length = (count($v) - 1) * 2;
-
-    if ((int) ($v[count($v) - 1] / pow(256, 1)) > 0) {
-        $length += 2; 
-
-    } else {
-      $length += 1;
-    }
-      
-    return $length;
-     
-  }
-
-	function _long2Str($v, $w) {
-
-		$s = "";
-
-		for ($i = 0; $i < longToStrSize($v); $i++) {
-		  $index = (int) ($i / 2);
-    	$pow = $i % 2;
-
-			if ($pow + 1 == 2) {
-	    	$char = $v[$index];
-	    } else {
-	    	$char = $v[$index] - ((int) ($v[$index] / pow(256, $pow + 1)) * pow(256, $pow + 1));
-	    }
-
-	    if ($pow > 0) {
-        $char = (int) ($char / pow(256, $pow));
-	    }
-
-	    	$s .= chr($char);
-
-		}
-
-		return $s;
-	}
-
-/*
-    function _long2str($v, $w) { //riscritto con int a 16 bit
-
-        $s = "";
-
-        for ($i = 0; $i < count($v); $i++) {
-
-            $pow = 0;
-            while ($pow < 4 and $v[$i] > pow(256, $pow)) {              
-
-                if ($pow + 1 == 4) {
-                    $char = $v[$i];
-                } else {
-                    $char = $v[$i] - ((int) ($v[$i] / pow(256, $pow + 1)) * pow(256, $pow + 1));
-                }
-
-                if ($pow > 0) {
-                    $char = (int) ($char / pow(256, $pow));
-                }
-
-                $s .= chr($char);
-
-                $pow++;
-            }
-
-        }
-
-        return $s;
-    }
 */
 
-    function _str2long($s, $w) { //riscritto con int a 16 bit
+	$s = "alessandroPasqualini1105";
+	$s = $xxtea->encrypt($s);
 
-        $v = array();
+	echo base64_encode($s) . "<br>";
+	echo $s . "<br>";
+	echo strlen($s) ."<br>";
 
-        for ($i = 0; $i < strlen($s); $i++) {
-
-            $index = (int) ($i / 2);
-            $pow = $i % 2;
-
-            if ($pow == 0) {
-                $v[$index] = ord($s[$i]);
-            
-            } else {
-                $v[$index] = $v[$index] + pow(256, $pow) * ord($s[$i]);
-            }
-        }
-
-        return $v;
-    }
+	echo $xxtea->decrypt($s);
 
 
 
-    $s = "alessandro!!123456789";
-/*
-    $v = _str2long($s, false);
+	/*
 
-   	$v[0] = dechex($v[0]);
-   	$v[1] = dechex($v[1]);
+	$text = base64_decode("ZJIxXnI1jo5vB3Wx");
 
-   	echo "<br>_str2long: <br>";
-   	print_r($v);
+	$en_text = $xxtea->decrypt($text);
+
+	echo "decrypt text: $en_text<br>";
+
 */
-
-   	$v = _str2long($s, null);
-
-   /*for ($i = 0; $i < count($v); $i++)
-   		$v[$i] = dechex($v[$i]);
-	*/
-   //echo "<br>strTolong: ". count($v) . "<br>";
-   	
-
-   	echo _long2Str($v, null);
-
-
-

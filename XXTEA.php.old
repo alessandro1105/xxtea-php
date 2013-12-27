@@ -187,15 +187,7 @@ class Crypt_XXTEA {
             return '';
         }
         $v = $this->_str2long($str, true);
-
-        echo "<br>blocchi array: " . count($v) . "<br>";
-        print_r($v);
-        echo "<br><br>";
-
         $v = $this->_encryptArray($v);
-
-        print_r($v);
-
         return $this->_long2str($v, false);
     }
 
@@ -253,7 +245,16 @@ class Crypt_XXTEA {
             return '';
         }
         $v = $this->_str2long($str, false);
+
+        //print_r($v);
+
         $v = $this->_decryptArray($v);
+
+        echo dechex($v[0]);
+        //return $v;
+        $s = $this->_long2str($v, true);
+        echo $s;
+
         return $this->_long2str($v, true);
     }
 
@@ -272,12 +273,6 @@ class Crypt_XXTEA {
      *                PEAR_Error on failure
      */
     function _decryptArray($v) {
-        echo "<br><br>DECRYPT<br>";
-
-        for ($i = 0; $i < count($v); $i++) {
-            echo dechex($v[$i]) . "<br>";
-        }
-
         $n = count($v) - 1;
         $z = $v[$n];
         $y = $v[0];
@@ -288,41 +283,13 @@ class Crypt_XXTEA {
             for ($p = $n; $p > 0; $p--) {
                 $z = $v[$p - 1];
                 $mx = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4)) ^ $this->_int32(($sum ^ $y) + ($this->_key[$p & 3 ^ $e] ^ $z));
-                    
-
                 $y = $v[$p] = $this->_int32($v[$p] - $mx);
             }
             $z = $v[$n];
-
-            $mx1 = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4));
-
-            $mx2a = ($sum ^ $y);
-            $mx2ba = $p & 3 ^ $e;
-            $mx2b = $this->_key[$mx2ba];
-            $mx2c = $z;
-
-            $mx2 = $this->_int32($mx2a + ($mx2b ^ $mx2c));
-
-
-            $mx = $mx1 ^ $mx2;
-                
-            echo "<BR>MX = $mx<BR>";
-            echo "MX1 = $mx1<br>";
-            echo "MX2 = $mx2<br>";
-            echo "MX2a = $mx2a<br>";
-            echo "MX2b = $mx2b<br>";
-            echo "MX2c = $mx2c<br>";
-            echo "MX2ba = $mx2ba<br>";
-
+            $mx = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4)) ^ $this->_int32(($sum ^ $y) + ($this->_key[$p & 3 ^ $e] ^ $z));
             $y = $v[0] = $this->_int32($v[0] - $mx);
             $sum = $this->_int32($sum - CRYPT_XXTEA_DELTA);
         }
-
-        for ($i = 0; $i < count($v); $i++) {
-            echo dechex($v[$i]) . "<br>";
-        }
-
-
         return $v;
     }
 
@@ -341,8 +308,10 @@ class Crypt_XXTEA {
      *
      * @return string  the string
      */
+
     /*
-    function _long2str($v, $w) {
+    function _long2str($v, $w) { //originale 
+        
         $len = count($v);
         $s = '';
         for ($i = 0; $i < $len; $i++) {
@@ -353,9 +322,11 @@ class Crypt_XXTEA {
         } else {
             return $s;
         }
+
     }*/
+    
 
-    /*
+    
     function _long2str($v, $w) { //originale riscritto
 
         $s = "";
@@ -384,46 +355,7 @@ class Crypt_XXTEA {
 
         return $s;
     }
-    */
-    function _long2str($v, $w) { //originale riscritto
-
-        $s = "";
-
-        for ($i = 0; $i < count($v); $i++) {
-
-            $pow = 0;
-
-            if ($v[$i] < 0) {
-                $v[$i] = 0xFFFFFFFF - abs($v[$i]) + 1;
-            }
-
-            while ($pow < 4 and $v[$i] > pow(256, $pow)) {              
-
-                if ($pow + 1 == 4) {
-                    $char = $v[$i];
-                } else {
-                    $char = $v[$i] - ((int) ($v[$i] / pow(256, $pow + 1)) * pow(256, $pow + 1));
-                }
-
-                if ($pow > 0) {
-                    $char = (int) ($char / pow(256, $pow));
-                }
-
-                $s .= chr($char);
-
-                $pow++;
-            }
-
-        }
-
-        if ($w) {
-            return substr($s, 0, $v[count($v) - 1]);
-        } else {
-            return $s;
-        }
-
-        return $s;
-    }
+    
 
     // }}}
 
@@ -439,15 +371,19 @@ class Crypt_XXTEA {
      *
      * @return string  the long integer array
      */
-    
-    function _str2long($s, $w) {
-        $v = array_values(unpack('V*', $s.str_repeat("\0", (4-strlen($s)%4)&3)));
+
+    /*
+    function _str2long($s, $w) { //originale
+        $v = array_values(unpack('V*', $s . str_repeat("\0", (4 - strlen($s) % 4 ) & 3) ) );
+
         if ($w) {
             $v[] = strlen($s);
         }
+
         return $v;
-    }
-    /*
+    }*/
+
+    
     function _str2long($s, $w) { //originale riscritto
 
         $v = array();
@@ -465,12 +401,9 @@ class Crypt_XXTEA {
             }
         }
 
-        if ($w) {
-            $v[] = strlen($s);
-        }
-
         return $v;
-    }*/
+    }
+    
 
     // }}}
 
