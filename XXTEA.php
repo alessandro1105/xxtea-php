@@ -187,15 +187,7 @@ class Crypt_XXTEA {
             return '';
         }
         $v = $this->_str2long($str, true);
-
-        echo "<br>blocchi array: " . count($v) . "<br>";
-        print_r($v);
-        echo "<br><br>";
-
         $v = $this->_encryptArray($v);
-
-        print_r($v);
-
         return $this->_long2str($v, false);
     }
 
@@ -214,6 +206,13 @@ class Crypt_XXTEA {
      *                PEAR_Error on failure
      */
     function _encryptArray($v) {
+
+        for ($i = 0; $i < count($v); $i++) {
+            echo "<br>" . dechex($v[$i]);
+        }
+
+        echo "<br>";
+
         $n = count($v) - 1;
         $z = $v[$n];
         $y = $v[0];
@@ -231,6 +230,14 @@ class Crypt_XXTEA {
             $mx = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4)) ^ $this->_int32(($sum ^ $y) + ($this->_key[$p & 3 ^ $e] ^ $z));
             $z = $v[$n] = $this->_int32($v[$n] + $mx);
         }
+
+        echo "<br>";
+        for ($i = 0; $i < count($v); $i++) {
+            echo "<br>" . dechex($v[$i]);
+        }
+
+        echo "<br>";
+
         return $v;
     }
 
@@ -272,11 +279,6 @@ class Crypt_XXTEA {
      *                PEAR_Error on failure
      */
     function _decryptArray($v) {
-        echo "<br><br>DECRYPT<br>";
-
-        for ($i = 0; $i < count($v); $i++) {
-            echo dechex($v[$i]) . "<br>";
-        }
 
         $n = count($v) - 1;
         $z = $v[$n];
@@ -288,40 +290,13 @@ class Crypt_XXTEA {
             for ($p = $n; $p > 0; $p--) {
                 $z = $v[$p - 1];
                 $mx = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4)) ^ $this->_int32(($sum ^ $y) + ($this->_key[$p & 3 ^ $e] ^ $z));
-                    
-
                 $y = $v[$p] = $this->_int32($v[$p] - $mx);
             }
             $z = $v[$n];
-
-            $mx1 = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4));
-
-            $mx2a = ($sum ^ $y);
-            $mx2ba = $p & 3 ^ $e;
-            $mx2b = $this->_key[$mx2ba];
-            $mx2c = $z;
-
-            $mx2 = $this->_int32($mx2a + ($mx2b ^ $mx2c));
-
-
-            $mx = $mx1 ^ $mx2;
-                
-            echo "<BR>MX = $mx<BR>";
-            echo "MX1 = $mx1<br>";
-            echo "MX2 = $mx2<br>";
-            echo "MX2a = $mx2a<br>";
-            echo "MX2b = $mx2b<br>";
-            echo "MX2c = $mx2c<br>";
-            echo "MX2ba = $mx2ba<br>";
-
+            $mx = $this->_int32((($z >> 5 & 0x07FFFFFF) ^ $y << 2) + (($y >> 3 & 0x1FFFFFFF) ^ $z << 4)) ^ $this->_int32(($sum ^ $y) + ($this->_key[$p & 3 ^ $e] ^ $z));
             $y = $v[0] = $this->_int32($v[0] - $mx);
             $sum = $this->_int32($sum - CRYPT_XXTEA_DELTA);
         }
-
-        for ($i = 0; $i < count($v); $i++) {
-            echo dechex($v[$i]) . "<br>";
-        }
-
 
         return $v;
     }
@@ -341,7 +316,8 @@ class Crypt_XXTEA {
      *
      * @return string  the string
      */
-    /*
+    
+
     function _long2str($v, $w) {
         $len = count($v);
         $s = '';
@@ -353,7 +329,7 @@ class Crypt_XXTEA {
         } else {
             return $s;
         }
-    }*/
+    }
 
     /*
     function _long2str($v, $w) { //originale riscritto
@@ -363,39 +339,12 @@ class Crypt_XXTEA {
         for ($i = 0; $i < count($v); $i++) {
 
             $pow = 0;
-            while ($pow < 4 and $v[$i] > pow(256, $pow)) {              
 
-                if ($pow + 1 == 4) {
-                    $char = $v[$i];
-                } else {
-                    $char = $v[$i] - ((int) ($v[$i] / pow(256, $pow + 1)) * pow(256, $pow + 1));
-                }
-
-                if ($pow > 0) {
-                    $char = (int) ($char / pow(256, $pow));
-                }
-
-                $s .= chr($char);
-
-                $pow++;
-            }
-
-        }
-
-        return $s;
-    }
-    */
-    function _long2str($v, $w) { //originale riscritto
-
-        $s = "";
-
-        for ($i = 0; $i < count($v); $i++) {
-
-            $pow = 0;
-
+            //PARTE CRITICA
             if ($v[$i] < 0) {
                 $v[$i] = 0xFFFFFFFF - abs($v[$i]) + 1;
             }
+            //FINE PARTE CRITICA
 
             while ($pow < 4 and $v[$i] > pow(256, $pow)) {              
 
@@ -410,6 +359,8 @@ class Crypt_XXTEA {
                 }
 
                 $s .= chr($char);
+
+                echo dechex($char) . "<br>";
 
                 $pow++;
             }
@@ -423,7 +374,7 @@ class Crypt_XXTEA {
         }
 
         return $s;
-    }
+    }*/
 
     // }}}
 
